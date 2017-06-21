@@ -1,5 +1,8 @@
+var flatpickr = require("flatpickr");
+var moment = require("moment");
+
 $(document).ready(function(){
-    timezones = {
+    var timezones = {
         VST: "UTC+07:00",
         JST: "UTC+09:00"
     };
@@ -24,6 +27,7 @@ $(document).ready(function(){
 
     $("#submit").click(function () {
         $("#content").html("");
+        var startDate, endDate, startTime, endTime, minDate, maxDate, tz;
         setupVariables();
         if (!startDate || !endDate) {
             alert("Date Range is required");
@@ -36,10 +40,10 @@ $(document).ready(function(){
             endDate = $("#end-date").val();
             startTime = $("#start-time").val();
             endTime = $("#end-time").val();
-            minDateString = startDate + "T" + startTime + timezones.VST.substring(3);
-            maxDateString = endDate + "T" + endTime + timezones.VST.substring(3);
-            minDate = new Date(minDateString).toJSON();
-            maxDate = new Date(maxDateString).toJSON();
+            var minDateString = startDate + "T" + startTime + timezones.VST.substring(3);
+            var maxDateString = endDate + "T" + endTime + timezones.VST.substring(3);
+            minDate = moment(minDateString).utc().format();
+            maxDate = moment(maxDateString).utc().format();
 
             // Get timezone location
             tz = $("#time-standard").val();
@@ -59,17 +63,17 @@ $(document).ready(function(){
         };
         gapi.client.calendar.freebusy.query(data)
             .then(function(response) {
-                resp = JSON.parse(response.body);
-                booked_time = resp.calendars[calendarId].busy;
-                dateArray = groupEventsByDate(booked_time);
+                var resp = JSON.parse(response.body);
+                var booked_time = resp.calendars[calendarId].busy;
+                var dateArray = groupEventsByDate(booked_time);
                 ignoreBusyTime(dateArray);
             });
 
         function groupEventsByDate(booked_time) {
-            dateArr = [];
-            for (i=0; i < booked_time.length; i++) {
-                dateString = booked_time[i].start.substring(0, 10);
-                date = Date.parse(dateString);
+            var dateArr = [];
+            for (var i=0; i < booked_time.length; i++) {
+                var dateString = booked_time[i].start.substring(0, 10);
+                var date = Date.parse(dateString);
                 if (!dateArr.length){
                     dateArr.push(
                         {[date]: [
@@ -77,8 +81,8 @@ $(document).ready(function(){
                         ]}
                     );
                 } else {
-                    lastEle = dateArr.length - 1;
-                    last_date = parseInt(Object.keys(dateArr[lastEle])[0]);
+                    var lastEle = dateArr.length - 1;
+                    var last_date = parseInt(Object.keys(dateArr[lastEle])[0]);
                     if (date == last_date) {
                         dateArr[lastEle][date].push(booked_time[i]);
                     } else {
@@ -95,18 +99,17 @@ $(document).ready(function(){
 
         function ignoreBusyTime(dateArray) {
             for (var i = 0; i < dateArray.length; i++) {
-                dateString = Object.keys(dateArray[i]);
-                date = new Date(parseInt(dateString));
-                message = formatDate(date) + " &nbsp &nbsp";
+                var dateString = Object.keys(dateArray[i]);
+                var message = moment(parseInt(dateString)).format("MMM Do (ddd)") + " &nbsp &nbsp";
                 message += listFreeTime(dateArray[i][dateString]);
                 $("#content").append('<p><strong>' + message + '</strong></p>');
             }
         }
 
         function listFreeTime(datetimeArr){
-            timeArr = convertDateToTime(datetimeArr);
-            freeTime = "";
-            startFound = false;
+            var timeArr = convertDateToTime(datetimeArr);
+            var freeTime = "";
+            var startFound = false;
 
             // Notice: if event are overlapped, they are combined in calendars.freebusy.query
 
@@ -124,11 +127,11 @@ $(document).ready(function(){
                                 freeTime += addTime(timeArr[i].end, endTime);
                             }
 
-                        // first element
+                            // first element
                         } else if (i==0) {
                             freeTime += addTime(startTime, timeArr[i].start);
 
-                        // not first element
+                            // not first element
                         } else {
                             // compare previous start with start time
                             if (greaterThan(timeArr[i-1].end, startTime)) {
@@ -174,11 +177,10 @@ $(document).ready(function(){
         }
 
         function greaterThan(time1, time2) {
-            arbitraryDate = "2000-01-01";
-            timeStr1 = arbitraryDate + "T" + time1;
-            timeStr2 = arbitraryDate + "T" + time2;
+            var timeStr1 = moment(time1, 'h:m');
+            var timeStr2 = moment(time2, 'h:m');
 
-            return (Date.parse(timeStr1) > Date.parse(timeStr2));
+            return timeStr2.isBefore(timeStr1)
         }
 
         function addTime(time1, time2) {
@@ -186,34 +188,5 @@ $(document).ready(function(){
         }
 
     }
-
-    function formatDate(fulldate){
-        var monthNames = [
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        ];
-        var dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-        var dayIndex = fulldate.getDay();
-        var date = fulldate.getDate();
-        var monthIndex = fulldate.getMonth();
-
-        return monthNames[monthIndex] + " " + ordinal_suffix_of(date) + " (" + dayNames[dayIndex]+ ") ";
-
-        // add suffix
-        function ordinal_suffix_of(i) {
-            var j = i % 10,
-                k = i % 100;
-            if (j == 1 && k != 11) {
-                return i + "st";
-            }
-            if (j == 2 && k != 12) {
-                return i + "nd";
-            }
-            if (j == 3 && k != 13) {
-                return i + "rd";
-            }
-            return i + "th";
-        }
-    }
 });
+
