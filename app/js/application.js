@@ -1,5 +1,6 @@
+/*eslint no-undef: 0*/
 require("flatpickr");
-let moment = require("moment");
+
 $(document).ready(() => {
     let timezones = {
         VST: "UTC+07:00",
@@ -31,7 +32,7 @@ $(document).ready(() => {
 
     function loadCalendarList(){
         if(typeof listOfCalendars !== "undefined"){
-            $("#calendar-id").prop('disabled', false);
+            $("#calendar-id").prop("disabled", false);
             for (let i = 0; i < listOfCalendars.length; i++) {
                 $("#calendar-id").append(`<option val=${listOfCalendars[i].id}>${listOfCalendars[i].summary }</option>`);
             }
@@ -48,7 +49,8 @@ $(document).ready(() => {
         if (!startDate || !endDate) {
             alert("Date Range is required");
         } else {
-            showFreeTime(minDate, maxDate, tz, startTime, endTime, calendarId);
+            let dateRange = createDateRange(startDate, endDate);
+            showFreeTime(minDate, maxDate, tz, startTime, endTime, calendarId, dateRange);
         }
 
         function init() {
@@ -67,7 +69,17 @@ $(document).ready(() => {
         }
     });
 
-    function showFreeTime(minDate, maxDate, tz, startTime, endTime, calendarId) {
+    function createDateRange(startDate, endDate) {
+        let start = new Date(startDate);
+        let end = new Date(endDate);
+        let dateRange = [];
+        for (let d = start; d < end; d.setDate(d.getDate()+1)){
+            dateRange.push({[d]:[]});
+        }
+        return dateRange;
+    }
+
+    function showFreeTime(minDate, maxDate, tz, startTime, endTime, calendarId, dateRange) {
         let data = {
             "timeMin": minDate,
             "timeMax": maxDate,
@@ -82,32 +94,18 @@ $(document).ready(() => {
             .then((response) => {
                 let resp = JSON.parse(response.body);
                 let booked_time = resp.calendars[calendarId].busy;
-                let dateArray = groupEventsByDate(booked_time);
+                let dateArray = groupEventsByDate(dateRange, booked_time);
                 ignoreBusyTime(dateArray);
             });
 
-        function groupEventsByDate(booked_time) {
-            let dateArr = [];
+        function groupEventsByDate(dateArr, booked_time) {
             for (let i=0; i < booked_time.length; i++) {
-                let dateString = booked_time[i].start.substring(0, 10);
-                let date = Date.parse(dateString);
-                if (!dateArr.length){
-                    dateArr.push(
-                        {[date]: [
-                            booked_time[i]
-                        ]}
-                    );
-                } else {
-                    let lastElement = dateArr.length - 1;
-                    let lastDate = parseInt(Object.keys(dateArr[lastElement])[0]);
-                    if (date == lastDate) {
-                        dateArr[lastElement][date].push(booked_time[i]);
-                    } else {
-                        dateArr.push(
-                            {[date]: [
-                                booked_time[i]
-                            ]}
-                        )
+                let eventString = booked_time[i].start.substring(0, 10);
+                let eventTime = new Date(eventString);
+                for (let j=0; j < dateArr.length; j++){
+                    let dateTime = new Date(Object.keys(dateArr[j]));
+                    if (eventTime.getTime() == dateTime.getTime()) {
+                        dateArr[j][dateTime].push(booked_time[i]);
                     }
                 }
             }
@@ -116,10 +114,16 @@ $(document).ready(() => {
 
         function ignoreBusyTime(dateArray) {
             for (let i = 0; i < dateArray.length; i++) {
-                let dateString = Object.keys(dateArray[i]);
-                let message = `${moment(parseInt(dateString)).format("MMM Do (ddd)")  } &nbsp &nbsp`;
-                message += listFreeTime(dateArray[i][dateString]);
-                $("#content").append(`<p><strong>${ message }</strong></p>`);
+                let date = new Date(Object.keys(dateArray[i]));
+                let message = `${moment(date).format("MMM Do (ddd)")  } &nbsp &nbsp`;
+                message += listFreeTime(dateArray[i][date]);
+
+                // color weekend
+                if (date % 7 == 2 || date % 7 == 3){
+                    $("#content").append(`<p style="color: #ff0052"><strong>${ message }</strong></p>`);
+                } else {
+                    $("#content").append(`<p><strong>${ message }</strong></p>`);
+                }
             }
         }
 
@@ -128,8 +132,13 @@ $(document).ready(() => {
             let freeTime = "";
             let startFound = false;
 
-            // Notice: if event are overlapped, they are combined in calendars.freebusy.query
+            // Check if the day doesn't have any event
+            if (!datetimeArr.length){
+                freeTime += addTime(startTime, endTime);
+                return freeTime;
+            }
 
+            // Notice: if event are overlapped, they are combined in calendars.freebusy.query
             for (let i = 0; i < timeArr.length; i++) {
                 if (!startFound) {
                     if (greaterThan(timeArr[i].start, endTime)) {

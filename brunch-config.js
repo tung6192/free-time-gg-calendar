@@ -17,7 +17,8 @@ exports.config = {
         globals: {
             $: 'jquery',
             jQuery: 'jquery',
-            bootstrap: 'bootstrap'
+            bootstrap: 'bootstrap',
+            moment: 'moment'
         },
         styles: {
             flatpickr: ['dist/flatpickr.min.css'],
