@@ -1,2 +1,2 @@
-var calendarId = "Calendar ID";
-var clientId = "Google Client ID";
+/*eslint no-unused-vars: ["error", { "varsIgnorePattern": "clientId" }]*/
+let clientId = "Google Client ID";

@@ -1,11 +1,14 @@
-var flatpickr = require("flatpickr");
-var moment = require("moment");
+require("flatpickr");
+let moment = require("moment");
 
-$(document).ready(function(){
-    var timezones = {
+$(document).ready(() => {
+    let timezones = {
         VST: "UTC+07:00",
         JST: "UTC+09:00"
     };
+
+    // Input time will have Vietnam Standard Timezone UTC+07:00 as default
+    let defaultTimeZone = "+07:00";
 
     $("#start-date, #end-date").flatpickr({});
 
@@ -25,23 +28,23 @@ $(document).ready(function(){
         time_24hr: true
     });
 
-    $("#submit").click(function () {
+    $("#submit").click(() => {
         $("#content").html("");
-        var startDate, endDate, startTime, endTime, minDate, maxDate, tz;
-        setupVariables();
+        let startDate, endDate, startTime, endTime, minDate, maxDate, tz;
+        init();
         if (!startDate || !endDate) {
             alert("Date Range is required");
         } else {
             showFreeTime(minDate, maxDate, tz, startTime, endTime);
         }
 
-        function setupVariables() {
+        function init() {
             startDate = $("#start-date").val();
             endDate = $("#end-date").val();
             startTime = $("#start-time").val();
             endTime = $("#end-time").val();
-            var minDateString = startDate + "T" + startTime + timezones.VST.substring(3);
-            var maxDateString = endDate + "T" + endTime + timezones.VST.substring(3);
+            let minDateString = `${ startDate }T${ startTime }${ defaultTimeZone }`;
+            let maxDateString = `${ endDate }T${ endTime }${ defaultTimeZone }`;
             minDate = moment(minDateString).utc().format();
             maxDate = moment(maxDateString).utc().format();
 
@@ -51,29 +54,29 @@ $(document).ready(function(){
     });
 
     function showFreeTime(minDate, maxDate, tz, startTime, endTime) {
-        var data = {
+        let data = {
             "timeMin": minDate,
             "timeMax": maxDate,
             "timeZone": timezones[tz],
             "items": [
                 {
-                    "id": calendarId
+                    "id": "primary"
                 }
             ]
         };
         gapi.client.calendar.freebusy.query(data)
-            .then(function(response) {
-                var resp = JSON.parse(response.body);
-                var booked_time = resp.calendars[calendarId].busy;
-                var dateArray = groupEventsByDate(booked_time);
+            .then((response) => {
+                let resp = JSON.parse(response.body);
+                let booked_time = resp.calendars["primary"].busy;
+                let dateArray = groupEventsByDate(booked_time);
                 ignoreBusyTime(dateArray);
             });
 
         function groupEventsByDate(booked_time) {
-            var dateArr = [];
-            for (var i=0; i < booked_time.length; i++) {
-                var dateString = booked_time[i].start.substring(0, 10);
-                var date = Date.parse(dateString);
+            let dateArr = [];
+            for (let i=0; i < booked_time.length; i++) {
+                let dateString = booked_time[i].start.substring(0, 10);
+                let date = Date.parse(dateString);
                 if (!dateArr.length){
                     dateArr.push(
                         {[date]: [
@@ -81,10 +84,10 @@ $(document).ready(function(){
                         ]}
                     );
                 } else {
-                    var lastEle = dateArr.length - 1;
-                    var last_date = parseInt(Object.keys(dateArr[lastEle])[0]);
-                    if (date == last_date) {
-                        dateArr[lastEle][date].push(booked_time[i]);
+                    let lastElement = dateArr.length - 1;
+                    let lastDate = parseInt(Object.keys(dateArr[lastElement])[0]);
+                    if (date == lastDate) {
+                        dateArr[lastElement][date].push(booked_time[i]);
                     } else {
                         dateArr.push(
                             {[date]: [
@@ -98,22 +101,22 @@ $(document).ready(function(){
         }
 
         function ignoreBusyTime(dateArray) {
-            for (var i = 0; i < dateArray.length; i++) {
-                var dateString = Object.keys(dateArray[i]);
-                var message = moment(parseInt(dateString)).format("MMM Do (ddd)") + " &nbsp &nbsp";
+            for (let i = 0; i < dateArray.length; i++) {
+                let dateString = Object.keys(dateArray[i]);
+                let message = `${moment(parseInt(dateString)).format("MMM Do (ddd)")  } &nbsp &nbsp`;
                 message += listFreeTime(dateArray[i][dateString]);
-                $("#content").append('<p><strong>' + message + '</strong></p>');
+                $("#content").append(`<p><strong>${ message }</strong></p>`);
             }
         }
 
         function listFreeTime(datetimeArr){
-            var timeArr = convertDateToTime(datetimeArr);
-            var freeTime = "";
-            var startFound = false;
+            let timeArr = convertDateToTime(datetimeArr);
+            let freeTime = "";
+            let startFound = false;
 
             // Notice: if event are overlapped, they are combined in calendars.freebusy.query
 
-            for (var i = 0; i < timeArr.length; i++) {
+            for (let i = 0; i < timeArr.length; i++) {
                 if (!startFound) {
                     if (greaterThan(timeArr[i].start, endTime)) {
                         freeTime += addTime(startTime, endTime);
@@ -169,7 +172,7 @@ $(document).ready(function(){
         }
 
         function convertDateToTime(dateTA) {
-            for (var i=0; i < dateTA.length; i++){
+            for (let i=0; i < dateTA.length; i++){
                 dateTA[i].start = dateTA[i].start.substring(11, 16);
                 dateTA[i].end = dateTA[i].end.substring(11, 16);
             }
@@ -177,14 +180,14 @@ $(document).ready(function(){
         }
 
         function greaterThan(time1, time2) {
-            var timeStr1 = moment(time1, 'h:m');
-            var timeStr2 = moment(time2, 'h:m');
+            let timeStr1 = moment(time1, "h:m");
+            let timeStr2 = moment(time2, "h:m");
 
             return timeStr2.isBefore(timeStr1)
         }
 
         function addTime(time1, time2) {
-            return time1 + "-" + time2 + tz + " &nbsp";
+            return `${ time1 } - ${ time2 }${ tz } &nbsp`;
         }
 
     }
