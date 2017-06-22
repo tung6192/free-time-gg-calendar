@@ -14,12 +14,18 @@
   <hr style="border-top: 1px solid #e29a9a;">
 
   <div class="row form-group">
-
     <label class="col-sm-2 control-label text-right">Action:</label>
     <!--Add buttons to initiate auth sequence and sign out-->
     <div class="col-sm-offset-1 col-sm-1">
       <button id="authorize-button" style="display: none;" class="btn btn-success">Authorize</button>
       <button id="signout-button" style="display: none;" class="btn btn-primary">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <label class="col-sm-2 control-label text-right">Calendar:</label>
+    <div class="col-sm-offset-1 col-sm-3">
+      <select name="calendar-id" id="calendar-id" class="form-control" disabled></select>
     </div>
   </div>
 

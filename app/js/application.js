@@ -1,6 +1,5 @@
 require("flatpickr");
 let moment = require("moment");
-
 $(document).ready(() => {
     let timezones = {
         VST: "UTC+07:00",
@@ -28,14 +27,28 @@ $(document).ready(() => {
         time_24hr: true
     });
 
+    loadCalendarList();
+
+    function loadCalendarList(){
+        if(typeof listOfCalendars !== "undefined"){
+            $("#calendar-id").prop('disabled', false);
+            for (let i = 0; i < listOfCalendars.length; i++) {
+                $("#calendar-id").append(`<option val=${listOfCalendars[i].id}>${listOfCalendars[i].summary }</option>`);
+            }
+        }
+        else{
+            setTimeout(loadCalendarList, 250);
+        }
+    }
+
     $("#submit").click(() => {
         $("#content").html("");
-        let startDate, endDate, startTime, endTime, minDate, maxDate, tz;
+        let startDate, endDate, startTime, endTime, minDate, maxDate, tz, calendarId;
         init();
         if (!startDate || !endDate) {
             alert("Date Range is required");
         } else {
-            showFreeTime(minDate, maxDate, tz, startTime, endTime);
+            showFreeTime(minDate, maxDate, tz, startTime, endTime, calendarId);
         }
 
         function init() {
@@ -47,27 +60,28 @@ $(document).ready(() => {
             let maxDateString = `${ endDate }T${ endTime }${ defaultTimeZone }`;
             minDate = moment(minDateString).utc().format();
             maxDate = moment(maxDateString).utc().format();
+            calendarId = $("#calendar-id").val();
 
             // Get timezone location
             tz = $("#time-standard").val();
         }
     });
 
-    function showFreeTime(minDate, maxDate, tz, startTime, endTime) {
+    function showFreeTime(minDate, maxDate, tz, startTime, endTime, calendarId) {
         let data = {
             "timeMin": minDate,
             "timeMax": maxDate,
             "timeZone": timezones[tz],
             "items": [
                 {
-                    "id": "primary"
+                    "id": calendarId
                 }
             ]
         };
         gapi.client.calendar.freebusy.query(data)
             .then((response) => {
                 let resp = JSON.parse(response.body);
-                let booked_time = resp.calendars["primary"].busy;
+                let booked_time = resp.calendars[calendarId].busy;
                 let dateArray = groupEventsByDate(booked_time);
                 ignoreBusyTime(dateArray);
             });
@@ -192,4 +206,3 @@ $(document).ready(() => {
 
     }
 });
-

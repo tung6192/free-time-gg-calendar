@@ -38,6 +38,10 @@ function initClient() {
         updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
         authorizeButton.onclick = handleAuthClick;
         signoutButton.onclick = handleSignoutClick;
+        gapi.client.calendar.calendarList.list()
+            .then((response) => {
+                listOfCalendars = response.result.items;
+            });
     });
 }
 
