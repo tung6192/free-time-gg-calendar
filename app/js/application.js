@@ -34,7 +34,11 @@ $(document).ready(() => {
         if(typeof listOfCalendars !== "undefined"){
             $("#calendar-id").prop("disabled", false);
             for (let i = 0; i < listOfCalendars.length; i++) {
-                $("#calendar-id").append(`<option val=${listOfCalendars[i].id}>${listOfCalendars[i].summary }</option>`);
+                if (listOfCalendars[i].primary){
+                    $("#calendar-id").append(`<option val=${listOfCalendars[i].id} selected="selected"> ${listOfCalendars[i].summary } </option>`);
+                } else {
+                    $("#calendar-id").append(`<option val=${listOfCalendars[i].id}> ${listOfCalendars[i].summary } </option>`);
+                }
             }
         }
         else{
@@ -119,8 +123,11 @@ $(document).ready(() => {
                 message += listFreeTime(dateArray[i][date]);
 
                 // color weekend
-                if (date % 7 == 2 || date % 7 == 3){
+                if (date % 7 == 2) {
                     $("#content").append(`<p style="color: #ff0052"><strong>${ message }</strong></p>`);
+                } else if (date % 7 == 3) {
+                    $("#content").append(`<p style="color: #ff0052"><strong>${ message }</strong></p>`);
+                    $("#content").append(`<div>---</div>`);
                 } else {
                     $("#content").append(`<p><strong>${ message }</strong></p>`);
                 }
