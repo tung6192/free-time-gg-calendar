@@ -1,7 +1,10 @@
 /*eslint no-undef: 0*/
 require("flatpickr");
+require("moment/locale/ja");
 
 $(document).ready(() => {
+
+    // Initial setup
     let timezones = {
         VST: "UTC+07:00",
         JST: "UTC+09:00"
@@ -28,6 +31,10 @@ $(document).ready(() => {
         time_24hr: true
     });
 
+    // Initiate clipboard
+    new clipboard('.btn');
+
+    // Load Calendar List
     loadCalendarList();
 
     function loadCalendarList(){
@@ -46,6 +53,13 @@ $(document).ready(() => {
         }
     }
 
+    // Get used language
+    let language;
+    $("input[type=radio][name=language]").on("change", function () {
+        language = $(this).val();
+    });
+
+    // Handle check free time click
     $("#submit").click(() => {
         $("#content").html("");
         let startDate, endDate, startTime, endTime, minDate, maxDate, tz, calendarId;
@@ -53,6 +67,7 @@ $(document).ready(() => {
         if (!startDate || !endDate) {
             alert("Date Range is required");
         } else {
+            $(".clipboard").show();
             let dateRange = createDateRange(startDate, endDate);
             showFreeTime(minDate, maxDate, tz, startTime, endTime, calendarId, dateRange);
         }
@@ -94,6 +109,8 @@ $(document).ready(() => {
                 }
             ]
         };
+
+        // Return value from GG Calendar API
         gapi.client.calendar.freebusy.query(data)
             .then((response) => {
                 let resp = JSON.parse(response.body);
@@ -119,6 +136,7 @@ $(document).ready(() => {
         function ignoreBusyTime(dateArray) {
             for (let i = 0; i < dateArray.length; i++) {
                 let date = new Date(Object.keys(dateArray[i]));
+                moment.locale(language);
                 let message = `${moment(date).format("MMM Do (ddd)")  } &nbsp &nbsp`;
                 message += listFreeTime(dateArray[i][date]);
 

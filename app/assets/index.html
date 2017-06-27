@@ -4,21 +4,25 @@
   <title>Google Calendar API Quickstart</title>
   <meta charset='utf-8' />
   <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
 </head>
 <body style="background: chocolate">
-<div class="container" style="background: #fff6d5; min-height: 700px">
-  <h2 class="text-center" style="font-weight: bold; color: #f4684c; margin-bottom: 35px">
+
+<div class="container main">
+
+  <!--Title-->
+  <h2 class="text-center title">
     Check Free Time - GG Calendar
   </h2>
-  <hr style="border-top: 1px solid #e29a9a;">
+  <hr class="hr-line">
 
+  <!--Admin Section-->
   <div class="row form-group">
     <label class="col-sm-2 control-label text-right">
       <span class="badge" data-toggle="tooltip" data-placement="top" title="Authenticate, then F5 to refresh and access calendar!">?</span>
       Action:
     </label>
-    <!--Add buttons to initiate auth sequence and sign out-->
     <div class="col-sm-offset-1 col-sm-1">
       <button id="authorize-button" style="display: none;" class="btn btn-success">Authorize</button>
       <button id="signout-button" style="display: none;" class="btn btn-primary">Sign Out</button>
@@ -32,7 +36,22 @@
     </div>
   </div>
 
-  <hr style="border-top: 1px solid #e29a9a;">
+  <!--Selection-->
+  <hr class="hr-line">
+
+
+  <div class="row form-group">
+    <label class="col-sm-2 control-label text-right">Output:</label>
+    <div class="col-sm-offset-1 col-sm-3 btn-group" data-toggle="buttons">
+      <label class="btn btn-primary active">
+        <input type="radio" name="language" value="en" checked> English
+      </label>
+      <label class="btn btn-primary">
+        <input type="radio" name="language" value="ja"> Japanese
+      </label>
+    </div>
+  </div>
+
   <form class="form-horizontal">
     <div class="form-group">
       <label class="col-sm-2 control-label">Date range:</label>
@@ -59,7 +78,7 @@
     </div>
 
     <div class="form-group">
-      <label for="time-standard" class="col-sm-2 control-label">Output Time Standard:</label>
+      <label for="time-standard" class="col-sm-2 control-label">Time Standard:</label>
       <div class="col-sm-offset-1 col-sm-3">
         <select name="name" id="time-standard" class="form-control">
           <option value="VST">VST - Vietnam Standard (+07:00) </option>
@@ -71,12 +90,27 @@
     <div class="form-group">
       <div class="col-sm-offset-3 col-sm-10">
         <button type="button" class="btn btn-success" id="submit">Check Free Time</button>
+
+        <!--Copy to clipboard-->
+        <div class="btn btn-success clipboard" data-clipboard-target="#content" style="display: none"
+             data-toggle="tooltip" data-placement="bottom" title="Copy to Clipboard">
+          <i class="fa fa-clipboard" aria-hidden="true"></i>
+        </div>
       </div>
+
     </div>
   </form>
-  <hr style="border-top: 1px solid #e29a9a;">
+  <hr class="hr-line">
 
   <div id="content" class="col-sm-offset-3"></div>
+
+</div>
+<div class="container">
+  <footer>
+    <div class="pull-right">
+      © Framgia Vietnam 2017
+    </div>
+  </footer>
 </div>
 
 <script src="/config.js"></script>

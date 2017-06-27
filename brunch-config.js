@@ -18,7 +18,8 @@ exports.config = {
             $: 'jquery',
             jQuery: 'jquery',
             bootstrap: 'bootstrap',
-            moment: 'moment'
+            moment: 'moment',
+            clipboard: 'clipboard'
         },
         styles: {
             flatpickr: ['dist/flatpickr.min.css'],

@@ -4,3 +4,21 @@
   font-size: 24pt;
   color: #3f894a;
 }
+
+.main{
+  background: #fff6d5;
+  min-height: 700px
+}
+
+.title{
+  font-weight: bold; color: #f4684c; margin-bottom: 35px
+}
+
+.hr-line{
+  border-top: 1px solid #e29a9a;
+}
+/*Footer*/
+footer div {
+  color: white;
+  margin: 10px 0;
+}
