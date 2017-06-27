@@ -35,9 +35,9 @@ $(document).ready(() => {
             $("#calendar-id").prop("disabled", false);
             for (let i = 0; i < listOfCalendars.length; i++) {
                 if (listOfCalendars[i].primary){
-                    $("#calendar-id").append(`<option val=${listOfCalendars[i].id} selected="selected"> ${listOfCalendars[i].summary } </option>`);
+                    $("#calendar-id").append(`<option value=${listOfCalendars[i].id} selected="selected"> ${listOfCalendars[i].summary } </option>`);
                 } else {
-                    $("#calendar-id").append(`<option val=${listOfCalendars[i].id}> ${listOfCalendars[i].summary } </option>`);
+                    $("#calendar-id").append(`<option value=${listOfCalendars[i].id}> ${listOfCalendars[i].summary } </option>`);
                 }
             }
         }
@@ -77,7 +77,7 @@ $(document).ready(() => {
         let start = new Date(startDate);
         let end = new Date(endDate);
         let dateRange = [];
-        for (let d = start; d < end; d.setDate(d.getDate()+1)){
+        for (let d = start; d <= end; d.setDate(d.getDate()+1)){
             dateRange.push({[d]:[]});
         }
         return dateRange;
