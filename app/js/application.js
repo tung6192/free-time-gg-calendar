@@ -54,7 +54,7 @@ $(document).ready(() => {
     }
 
     // Get used language
-    let language;
+    let language = 'en';
     $("input[type=radio][name=language]").on("change", function () {
         language = $(this).val();
     });
